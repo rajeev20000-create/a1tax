@@ -1,0 +1,11 @@
+node_modules
+dist
+.git
+.gitignore
+.image-originals
+.DS_Store
+*.log
+.env
+.env.local
+Website generator.zip
+temp.html
