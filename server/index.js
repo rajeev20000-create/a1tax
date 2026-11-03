@@ -9,7 +9,7 @@ const DIST = path.resolve(__dirname, '../dist')
 
 const {
   PORT = 3000,
-  SMTP_HOST = 'smtp.gmail.com',
+  SMTP_HOST,
   SMTP_PORT = 465,
   SMTP_USER,
   SMTP_PASS,
@@ -18,11 +18,16 @@ const {
 
 // Credentials come only from the environment. Never hardcode them —
 // this repository is public.
-const mailReady = Boolean(SMTP_USER && SMTP_PASS)
+//
+// SMTP_HOST has no default on purpose. Guessing one lets a missing variable
+// fail as an opaque authentication error against the wrong provider instead
+// of an obvious misconfiguration here.
+const missing = ['SMTP_HOST', 'SMTP_USER', 'SMTP_PASS'].filter(k => !process.env[k])
+const mailReady = missing.length === 0
 const recipient = MAIL_TO || SMTP_USER
 
 if (!mailReady) {
-  console.warn('[mail] SMTP_USER / SMTP_PASS not set — /api/contact will return 503')
+  console.warn(`[mail] not configured (missing: ${missing.join(', ')}) — /api/contact will return 503`)
 }
 
 const transporter = mailReady
@@ -113,7 +118,8 @@ app.post('/api/contact', async (req, res) => {
 
   try {
     await transporter.sendMail({
-      // Gmail only allows sending as the authenticated account.
+      // Must stay the authenticated mailbox. tralgos.com publishes SPF with a
+      // `-all` hard fail, so a mismatched From is rejected, not just spam-binned.
       from: `"A1 Taxcellent Website" <${SMTP_USER}>`,
       to: recipient,
       replyTo: `"${name}" <${email}>`, // hitting Reply answers the visitor
