@@ -12,10 +12,22 @@ COPY . .
 RUN npm run build
 
 # ---------- serve ----------
-# Named so it can be passed as a build target if needed.
-# Dokploy's "Docker Build Stage" field must be either empty or "production".
-FROM nginx:1.27-alpine AS production
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Node now serves the static site AND handles POST /api/contact,
+# so the SMTP password never reaches the browser.
+# Dokploy's "Docker Build Stage" field must be empty or "production".
+FROM node:22-alpine AS production
+WORKDIR /app
+ENV NODE_ENV=production
+
+# Runtime deps only — no Vite, no TypeScript, no React toolchain.
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --no-audit --no-fund && npm cache clean --force
+
+COPY --from=build /app/dist ./dist
+COPY server ./server
+
+# Drop root; the node image ships an unprivileged `node` user.
+USER node
+
+EXPOSE 3000
+CMD ["node", "server/index.js"]

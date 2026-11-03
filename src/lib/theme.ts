@@ -20,7 +20,6 @@ export const MAP_LNG = 75.806806
 export const INSTAGRAM_URL = 'https://www.instagram.com/a1taxcellent/'
 export const YOUTUBE_URL = 'https://youtube.com/@a1taxcellent'
 export const FACEBOOK_URL = 'https://www.facebook.com/share/1CWgijsXAe/'
-export const FORMSPREE_ENDPOINT = 'https://formspree.io/f/maqrllll'
 export const WHATSAPP_QR = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&margin=8&data=${encodeURIComponent(WHATSAPP_LINK)}`
 
 export const unsplash = (id: string, w: number, h: number) => `https://images.unsplash.com/${id}?w=${w}&h=${h}&fit=crop&auto=format`

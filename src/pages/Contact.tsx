@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { Clock, ShieldCheck, Users, Headset, Mail, Phone, Share2, MessageCircle, MapPin, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react'
-import { NAVY, TEAL, PARA, BORDER, unsplash, FORMSPREE_ENDPOINT, PHONE_SHORT, PHONE_TEL, EMAIL, INSTAGRAM_URL, WHATSAPP_LINK, WHATSAPP_QR, MAP_LAT, MAP_LNG } from '@/lib/theme'
+import { NAVY, TEAL, PARA, BORDER, unsplash, PHONE_SHORT, PHONE_TEL, EMAIL, INSTAGRAM_URL, WHATSAPP_LINK, WHATSAPP_QR, MAP_LAT, MAP_LNG } from '@/lib/theme'
 import { branches, contactStrip } from '@/lib/data'
 import { useReveal } from '@/lib/hooks'
 
@@ -17,10 +17,11 @@ export default function Contact() {
     const form = e.currentTarget
     setStatus('sending')
     try {
-      const res = await fetch(FORMSPREE_ENDPOINT, {
+      // Our own backend (server/index.js) mails the enquiry straight to EMAIL.
+      const res = await fetch('/api/contact', {
         method: 'POST',
-        headers: { Accept: 'application/json' },
-        body: new FormData(form),
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify(Object.fromEntries(new FormData(form))),
       })
       if (!res.ok) throw new Error('Submission failed')
       form.reset()
@@ -71,7 +72,7 @@ export default function Contact() {
               <h3 style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: 18, color: NAVY }}>Send Us a Message</h3>
             </div>
             <p style={{ color: '#94A3B8', fontSize: 13, marginBottom: 22 }}>Fill out the form and our team will get back to you shortly.</p>
-            <form action={FORMSPREE_ENDPOINT} method="POST" onSubmit={handleSubmit}>
+            <form action="/api/contact" method="POST" onSubmit={handleSubmit}>
               <input type="text" name="_gotcha" tabIndex={-1} autoComplete="off" aria-hidden="true" style={{ display: 'none' }} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 14 }} className="form-grid">
                 <input name="name" required placeholder="Full Name *" aria-label="Full Name" style={{ width: '100%', padding: '12px 14px', borderRadius: 10, border: `2px solid ${BORDER}`, fontSize: 16, fontFamily: 'Inter', fontWeight: 400, outline: 'none', color: NAVY }}
